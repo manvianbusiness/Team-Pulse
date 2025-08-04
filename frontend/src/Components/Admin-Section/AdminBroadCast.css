@@ -1,0 +1,51 @@
+/* Apply Montserrat font globally */
+.admin-broadcast-wrapper {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.main-content {
+  margin-left: 250px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.text-brand {
+  color: #19BDE8;
+}
+
+.card-custom {
+  border: none;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-header-brand {
+  background-color: #19BDE8;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.card-header-dark {
+  background-color: #202020;
+  color: #ffffff;
+}
+
+.btn-brand {
+  background-color: #19BDE8;
+  border: none;
+  font-weight: 600;
+}
+
+.btn-brand:hover {
+  background-color: #17a8d3;
+}
+
+.form-control-custom {
+  border-radius: 0.375rem;
+  border: 1px solid #ced4da;
+  box-shadow: none;
+}
+
+.form-control-custom:focus {
+  border-color: #19BDE8;
+  box-shadow: 0 0 0 0.2rem rgba(25, 189, 232, 0.25);
+}

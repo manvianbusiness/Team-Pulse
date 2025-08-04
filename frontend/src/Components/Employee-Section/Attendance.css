@@ -1,0 +1,93 @@
+/* Attendance.css */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+body, html {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #f5faff;
+  color: #202020;
+  margin: 0;
+  padding: 0;
+}
+
+/* Main content padding */
+.attendance-content {
+  background-color: #f5faff;
+  min-height: 100vh;
+  animation: fadeIn 1s ease-in-out;
+  margin-left: 250px;
+}
+
+/* Summary Cards */
+.summary-card {
+  border: none;
+  border-radius: 16px;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.summary-card.present {
+  background-color: #28a745;
+}
+.summary-card.absent {
+  background-color: #dc3545;
+}
+.summary-card.leave {
+  background-color: #ffc107;
+  color: #202020;
+}
+.summary-card.total {
+  background-color: #19BDE8;
+}
+
+/* On hover */
+.summary-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Card Header */
+.card-header.bg-primary {
+  background-color: #19BDE8 !important;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+/* Attendance Table */
+.table th, .table td {
+  font-family: 'Montserrat', sans-serif;
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* Clock In/Out Button */
+button.btn-success, button.btn-danger {
+  font-weight: 600;
+  padding: 10px 20px;
+  font-family: 'Montserrat', sans-serif;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+button.btn-success:hover {
+  background-color: #28a745cc;
+}
+
+button.btn-danger:hover {
+  background-color: #dc3545cc;
+}
+
+/* Status Badges */
+.badge.bg-success,
+.badge.bg-danger,
+.badge.bg-warning {
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Fade In */
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}

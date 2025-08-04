@@ -1,0 +1,70 @@
+/* EmployeeBroadcast.css */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+body, html {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #f5faff;
+  color: #202020;
+}
+
+.container-fluid.bg-light {
+  background-color: #f5faff !important;
+  animation: fadeIn 1s ease-in-out;
+}
+
+h3.text-primary {
+  color: #19BDE8 !important;
+  font-weight: 600;
+}
+
+.card {
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(25, 189, 232, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.card-header {
+  background-color: #19BDE8 !important;
+  color: #fff;
+  font-weight: 600;
+  font-size: 18px;
+  border-radius: 15px 15px 0 0;
+}
+
+.list-group-item {
+  background-color: #ffffff;
+  border: none;
+  border-bottom: 1px solid #eaeaea;
+  padding: 20px 15px;
+  transition: background-color 0.3s ease;
+}
+
+.list-group-item:hover {
+  background-color: #f0faff;
+}
+
+.list-group-item strong {
+  color: #202020;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.list-group-item p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #444;
+}
+
+.list-group-item small {
+  font-size: 12px;
+  color: #888;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}

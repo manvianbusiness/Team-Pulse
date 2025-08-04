@@ -1,0 +1,104 @@
+ /* General Layout */
+.container-wrapper {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #f8f9fa;
+}
+
+/* Card Base Style */
+.card-summary {
+  background-color: #19BDE8 !important;
+  border: none;
+  color: #FFFFFF;
+  border-radius: 12px;
+  transition: transform 0.2s ease;
+}
+
+.card-summary:hover {
+  transform: scale(1.02);
+}
+
+/* Leave Specific Card Customizations */
+.card-blue {
+  background-color: #19BDE8 !important;
+}
+
+.card-green {
+  background-color: #19BDE8 !important;
+}
+
+.card-yellow {
+  background-color: #19BDE8 !important;
+  color: #FFFFFF !important;
+}
+
+.card-red {
+  background-color: #19BDE8 !important;
+}
+
+/* Button Styling */
+.btn-primary {
+  background-color: #19BDE8 !important;
+  border: none;
+  font-weight: 600;
+}
+
+.btn-outline-secondary {
+  color: #19BDE8;
+  border-color: #19BDE8;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #19BDE8;
+  color: #FFFFFF;
+}
+
+/* Headings & Text */
+h5, h6, h4, p, th, td, li, a {
+  font-family: 'Montserrat', sans-serif;
+  color: #202020;
+}
+
+.card h5 {
+  color: #202020;
+  font-weight: 600;
+}
+
+.card p {
+  color: #202020;
+}
+
+/* Table Styling */
+.table {
+  background-color: #FFFFFF;
+}
+
+.table th {
+  background-color: #e9f7fd;
+  color: #202020;
+}
+
+.table td {
+  color: #202020;
+}
+
+/* ListGroup Items */
+.list-group-item {
+  font-family: 'Montserrat', sans-serif;
+  color: #202020;
+}
+
+/* Quick Links */
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+ul li a {
+  color: #19BDE8;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+ul li a:hover {
+  text-decoration: underline;
+}

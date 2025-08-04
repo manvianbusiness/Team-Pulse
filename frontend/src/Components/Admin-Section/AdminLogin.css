@@ -1,0 +1,66 @@
+/* AdminLogin.css */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+
+body {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.login-image {
+  max-height: 600px;
+  object-fit: cover;
+}
+
+.admin-login-container {
+  background: linear-gradient(to right, #ffffff, #eaf9fd);
+}
+
+.login-image {
+  max-width: 100%;
+  height: auto;
+}
+
+.login-card {
+  border: none;
+  border-radius: 12px;
+  background-color: #ffffff;
+}
+
+.login-card h3 {
+  color: #19BDE8;
+  font-weight: 600;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #202020;
+}
+
+.form-control {
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+}
+
+.form-control:focus {
+  border-color: #19BDE8;
+  box-shadow: 0 0 0 0.2rem rgba(25, 189, 232, 0.25);
+}
+
+button.btn-primary {
+  background-color: #19BDE8;
+  border: none;
+  font-weight: 600;
+}
+
+button.btn-primary:hover {
+  background-color: #17a8d3;
+}
+
+.text-center a {
+  color: #19BDE8;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.text-center a:hover {
+  text-decoration: underline;
+}

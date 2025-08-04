@@ -1,0 +1,131 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #f8f9fa;
+  color: #202020;
+}
+
+.employee-container {
+ margin-right: 10px;
+  padding: 20px;
+}
+
+h4 {
+  font-weight: bold;
+  color: #19BDE8;
+}
+
+.card {
+  border: 1px solid #19BDE8;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(25, 189, 232, 0.2);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  color: #202020;
+}
+
+.card-subtitle {
+  font-size: 0.95rem;
+  color: #6c757d;
+}
+
+.badge-info {
+  background-color: #19BDE8;
+}
+
+
+
+.btn-outline-info {
+  color: #19BDE8;
+  border-color: #19BDE8;
+}
+
+.btn-outline-info:hover {
+  background-color: #19BDE8;
+  color: #fff;
+}
+
+.btn-outline-warning {
+  color: #ffc107;
+  border-color: #ffc107;
+}
+
+.btn-outline-warning:hover {
+  background-color: #ffc107;
+  color: #202020;
+}
+
+.btn-outline-danger {
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #19BDE8;
+  border-color: #19BDE8;
+  color: #fff;
+}
+
+.page-link {
+  color: #202020;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.modal-title {
+  font-weight: 600;
+  color: #19BDE8;
+}
+
+.modal-body,
+.modal-footer {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.form-label {
+  font-weight: 500;
+}
+
+.form-control {
+  font-family: 'Montserrat', sans-serif;
+  border-radius: 0.5rem;
+  border: 1px solid #ced4da;
+}
+
+.form-control:focus {
+  border-color: #19BDE8;
+  box-shadow: 0 0 0 0.2rem rgba(25, 189, 232, 0.25);
+}
+
+button.btn-success {
+  background-color: #19BDE8;
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+}
+
+button.btn-success:hover {
+  background-color: #17abd6;
+}
+
+button.btn-primary {
+  background-color: #19BDE8;
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+}
+
+button.btn-primary:hover {
+  background-color: #17abd6;
+}

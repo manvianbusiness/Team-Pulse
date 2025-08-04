@@ -1,0 +1,102 @@
+/* Base Layout */
+.container {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #f5faff;
+  padding: 2rem;
+  min-height: 100vh;
+  color: #202020;
+  margin-left: 250px;
+}
+
+/* Page Title */
+h2 {
+  font-weight: 700;
+  color: #19BDE8;
+}
+
+/* Card Styling */
+.card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(25, 189, 232, 0.15);
+}
+
+/* Card Header */
+.card-header {
+  background-color: #19BDE8 !important;
+  color: #FFFFFF !important;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border-radius: 12px 12px 0 0;
+}
+
+/* Profile Image */
+img.rounded-circle {
+  border: 4px solid #19BDE8;
+  object-fit: cover;
+}
+
+/* Section Headings */
+h5 {
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+  color: #202020;
+}
+
+/* Paragraphs */
+p {
+  margin-bottom: 0.5rem;
+  color: #202020;
+  font-size: 0.95rem;
+}
+
+/* Form Elements */
+.form-label {
+  font-weight: 500;
+  color: #202020;
+}
+
+.form-control,
+.form-select {
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+  font-family: 'Montserrat', sans-serif;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #19BDE8;
+  box-shadow: 0 0 0 0.2rem rgba(25, 189, 232, 0.2);
+}
+
+/* Buttons */
+.btn-warning {
+  font-weight: 600;
+  background-color: #f6b20c;
+  border: none;
+  color: #202020;
+}
+
+.btn-warning:hover {
+  background-color: #e2a303;
+  color: #ffffff;
+}
+
+.btn-success {
+  font-weight: 600;
+  background-color: #19BDE8;
+  border: none;
+  color: #ffffff;
+}
+
+.btn-success:hover {
+  background-color: #17a3c6;
+}
+
+/* File input spacing */
+.form-control[type="file"] {
+  padding: 8px;
+}
+
