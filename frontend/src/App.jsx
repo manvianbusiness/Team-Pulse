@@ -9,7 +9,7 @@ import Dashboard from './Components/Admin-Section/Dashboard';
 import AdminAttendance from './Components/Admin-Section/Attendance';
 import EmployeesList from './Components/Admin-Section/Employees';
 import AdminBroadcast from './Components/Admin-Section/AdminBroadCast';
-// import AddLeave from './Components/Admin-Section/AddLeave';
+import AddLeave from './Components/Admin-Section/AddLeave';
 import LeavePolicies from './Components/Admin-Section/LeavePolicies';
 
 // Employee Components
@@ -20,8 +20,6 @@ import Attendance from './Components/Employee-Section/Attendance';
 import EmployeeProfile from './Components/Employee-Section/EmployeeProfile';
 import AdminSidebar from './Components/Admin-Section/AdminSidebar';
 import Broadcast from './Components/Employee-Section/EmployeeBroadcast';
-import AddLeaveType from './Components/Admin-Section/AddLeaveType';
-
 const App = () => {
   return (
     <Router>
@@ -34,7 +32,7 @@ const App = () => {
         <Route path="/employees-list" element={<EmployeesList />} />
         <Route path="/admin-broadcast" element={<AdminBroadcast />} />
         <Route path="/leave-policies" element={<LeavePolicies />} />
-        <Route path='/addleavetype' element={<AddLeaveType />} />
+        <Route path='/addleavetype' element={<AddLeave />} />
         {/* Employee Routes */}
         <Route path="/employee-login" element={<EmployeeLogin />} />
         <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
