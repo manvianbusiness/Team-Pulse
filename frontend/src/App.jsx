@@ -20,6 +20,7 @@ import Attendance from './Components/Employee-Section/Attendance';
 import EmployeeProfile from './Components/Employee-Section/EmployeeProfile';
 import AdminSidebar from './Components/Admin-Section/AdminSidebar';
 import Broadcast from './Components/Employee-Section/EmployeeBroadcast';
+import AddLeaveType from './Components/Admin-Section/AddLeaveType';
 
 const App = () => {
   return (
@@ -33,7 +34,7 @@ const App = () => {
         <Route path="/employees-list" element={<EmployeesList />} />
         <Route path="/admin-broadcast" element={<AdminBroadcast />} />
         <Route path="/leave-policies" element={<LeavePolicies />} />
-      
+        <Route path='/addleavetype' element={<AddLeaveType />} />
         {/* Employee Routes */}
         <Route path="/employee-login" element={<EmployeeLogin />} />
         <Route path="/employee-dashboard" element={<EmployeeDashboard />} />

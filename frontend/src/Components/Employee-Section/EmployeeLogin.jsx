@@ -13,10 +13,10 @@ import {
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaLock } from "react-icons/fa";
-import "./EmployeeLogin.css"; // optional if you add custom styles
+import "./EmployeeLogin.css";
 
 const EmployeeLogin = () => {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
@@ -25,30 +25,32 @@ const EmployeeLogin = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch("http://127.0.0.1:5000/employee_login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          username: email,
-          password,
-        }),
+        body: JSON.stringify({ identifier, password }),
       });
 
       const data = await response.json();
 
-      if (response.ok && data.role === "employee") {
-        setErrorMsg("");
-        localStorage.setItem("employee", JSON.stringify(data));
-        console.log("Employee Login Successful:", data);
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      const { user_id, role } = data;
+
+      if (role === "employee") {
+        localStorage.setItem("user_id", user_id);
+        localStorage.setItem("role", role);
         navigate("/employee-dashboard");
       } else {
-        setErrorMsg(data.message || "Invalid credentials");
+        alert("Access denied: Not an employee");
       }
-    } catch (err) {
-      console.error("Login error:", err);
-      setErrorMsg("Server error. Please try again later.");
+    } catch (error) {
+      console.error("Login error:", error.message);
+      setErrorMsg(error.message);
     }
   };
 
@@ -56,41 +58,18 @@ const EmployeeLogin = () => {
     <Container fluid className="employee-login-container">
       <Row className="align-items-center justify-content-center vh-100">
         <Col md={6} className="text-center">
-          <Carousel
-            fade
-            interval={3000}
-            controls={false}
-            indicators={false}
-            pause={false}
-            wrap={true}
-          >
+          <Carousel fade interval={3000} controls={false} indicators={false} pause={false} wrap={true}>
             <Carousel.Item>
-              <img
-                className="d-block w-100 login-image"
-                src={slide1}
-                alt="Slide 1"
-              />
+              <img className="d-block w-100 login-image" src={slide1} alt="Slide 1" />
             </Carousel.Item>
             <Carousel.Item>
-              <img
-                className="d-block w-100 login-image"
-                src={slide2}
-                alt="Slide 2"
-              />
+              <img className="d-block w-100 login-image" src={slide2} alt="Slide 2" />
             </Carousel.Item>
             <Carousel.Item>
-              <img
-                className="d-block w-100 login-image"
-                src={slide1}
-                alt="Slide 3"
-              />
+              <img className="d-block w-100 login-image" src={slide1} alt="Slide 3" />
             </Carousel.Item>
-              <Carousel.Item>
-              <img
-                className="d-block w-100 login-image"
-                src={slide2}
-                alt="Slide 4"
-              />
+            <Carousel.Item>
+              <img className="d-block w-100 login-image" src={slide2} alt="Slide 4" />
             </Carousel.Item>
           </Carousel>
         </Col>
@@ -105,13 +84,13 @@ const EmployeeLogin = () => {
               <Form.Group className="mb-3">
                 <Form.Label>
                   <FaUser className="me-2" />
-                  Email address
+                  Username / Email
                 </Form.Label>
                 <Form.Control
-                  type="email"
-                  placeholder="Enter employee email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="text"
+                  placeholder="Enter your username or email"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   required
                 />
               </Form.Group>
@@ -123,7 +102,7 @@ const EmployeeLogin = () => {
                 </Form.Label>
                 <Form.Control
                   type="password"
-                  placeholder="Password"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required

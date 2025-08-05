@@ -3,47 +3,40 @@
 print("----- Flask Application is starting from THIS file! -----")
 
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_cors import CORS
 from datetime import date
-from functools import wraps  # For custom decorators
+from functools import wraps
 import os
 
 # Database configuration
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'Rejoy@2005',
+    'password': 'mysql123', # !! IMPORTANT: Ensure this is your actual MySQL password
     'database': 'leave_management_db'
 }
 
 # Function to get a new database connection
 def get_db_connection():
+    """
+    Establishes a connection to the MySQL database.
+    """
     try:
-        conn = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='Rejoy@2005',
-            database='leave_management_db'
-        )
-        print("✅ Connected to database.")
+        conn = mysql.connector.connect(**DB_CONFIG)
         return conn
     except mysql.connector.Error as err:
-        print(f"❌ Database connection error: {err}")
+        print(f"Error connecting to database: {err}")
         return None
 
 # Create a Flask application instance
 app = Flask(__name__)
-CORS(app) 
+CORS(app)
+
 
 # --- CUSTOM, TEMPORARY INSECURE DECORATORS ---
-# These decorators are a temporary measure to bypass a broken JWT implementation.
-# They check for custom headers instead of a token to authenticate users and admins.
 def custom_admin_required():
-    """
-    A temporary decorator that checks for an 'X-User-Role: admin' header.
-    """
     def wrapper(fn):
         @wraps(fn)
         def decorator(*args, **kwargs):
@@ -55,15 +48,11 @@ def custom_admin_required():
     return wrapper
 
 def custom_user_required():
-    """
-    A temporary decorator that checks for an 'X-User-ID' header.
-    """
     def wrapper(fn):
         @wraps(fn)
         def decorator(*args, **kwargs):
             user_id = request.headers.get('X-User-ID')
             if user_id:
-                # Store the user_id in the request global for later use
                 request.current_user_id = int(user_id)
                 return fn(*args, **kwargs)
             else:
@@ -74,17 +63,12 @@ def custom_user_required():
 
 
 # --- Basic Health Check Endpoints ---
-
 @app.route('/')
 def hello_world():
-    """A simple home route to confirm the server is running."""
     return 'Hello, World! Welcome to Leave Management Backend!'
 
 @app.route('/test_db_connection')
 def test_db_connection():
-    """
-    A test route to check if the database connection is working.
-    """
     conn = None
     try:
         conn = get_db_connection()
@@ -99,20 +83,17 @@ def test_db_connection():
             conn.close()
 
 
-# --- User Authentication Endpoints ---
+# --- User Authentication Endpoints (Updated with Role-Based Login) ---
 
 @app.route('/register', methods=['POST'])
 def register_user():
-    """
-    Registers a new user in the database.
-    """
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
     email = data.get('email')
     first_name = data.get('first_name')
     last_name = data.get('last_name')
-    role = data.get('role', 'employee') # Default role is 'employee'
+    role = data.get('role', 'employee')
 
     if not username or not password or not email:
         return jsonify({"message": "Username, password, and email are required."}), 400
@@ -135,7 +116,7 @@ def register_user():
         conn.commit()
         return jsonify({"message": "User registered successfully!", "user_id": cursor.lastrowid}), 201
     except mysql.connector.Error as err:
-        if err.errno == 1062: # Duplicate entry error
+        if err.errno == 1062:
             return jsonify({"message": "Username or email already exists."}), 409
         return jsonify({"message": f"Database error: {err}"}), 500
     except Exception as e:
@@ -147,17 +128,17 @@ def register_user():
             conn.close()
 
 
-@app.route('/login', methods=['POST'])
-def login_user():
+@app.route('/admin_login', methods=['POST'])
+def admin_login():
     """
-    Authenticates a user and returns their user_id and role.
+    Authenticates an admin user.
     """
     data = request.get_json()
-    username = data.get('username')
+    identifier = data.get('identifier') # Can be username or email
     password = data.get('password')
 
-    if not username or not password:
-        return jsonify({"message": "Username and password are required."}), 400
+    if not identifier or not password:
+        return jsonify({"message": "Username/Email and password are required."}), 400
 
     conn = None
     cursor = None
@@ -166,18 +147,55 @@ def login_user():
         if conn is None:
             return jsonify({"message": "Database connection error."}), 500
 
-        cursor = conn.cursor(dictionary=True) # dictionary=True makes rows returned as dicts
-        query = "SELECT id, username, password_hash, role FROM users WHERE username = %s"
-        cursor.execute(query, (username,))
+        cursor = conn.cursor(dictionary=True)
+        query = "SELECT id, username, password_hash, role FROM users WHERE (username = %s OR email = %s) AND role = 'admin'"
+        cursor.execute(query, (identifier, identifier))
         user = cursor.fetchone()
 
         if user and check_password_hash(user['password_hash'], password):
-            # TEMPORARY: For demonstration, we just return the user ID and role
             return jsonify(user_id=user['id'], role=user['role']), 200
         else:
-            return jsonify({"message": "Invalid username or password."}), 401
+            return jsonify({"message": "Invalid admin username/email or password."}), 401
     except Exception as e:
-        print(f"ERROR: login_user - An unexpected error occurred: {str(e)}")
+        print(f"ERROR: admin_login - An unexpected error occurred: {str(e)}")
+        return jsonify({"message": f"An unexpected error occurred: {str(e)}"}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn and conn.is_connected():
+            conn.close()
+
+
+@app.route('/employee_login', methods=['POST'])
+def employee_login():
+    """
+    Authenticates an employee user.
+    """
+    data = request.get_json()
+    identifier = data.get('identifier') # Can be username or email
+    password = data.get('password')
+
+    if not identifier or not password:
+        return jsonify({"message": "Username/Email and password are required."}), 400
+
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        if conn is None:
+            return jsonify({"message": "Database connection error."}), 500
+
+        cursor = conn.cursor(dictionary=True)
+        query = "SELECT id, username, password_hash, role FROM users WHERE (username = %s OR email = %s) AND role = 'employee'"
+        cursor.execute(query, (identifier, identifier))
+        user = cursor.fetchone()
+
+        if user and check_password_hash(user['password_hash'], password):
+            return jsonify(user_id=user['id'], role=user['role']), 200
+        else:
+            return jsonify({"message": "Invalid employee username/email or password."}), 401
+    except Exception as e:
+        print(f"ERROR: employee_login - An unexpected error occurred: {str(e)}")
         return jsonify({"message": f"An unexpected error occurred: {str(e)}"}), 500
     finally:
         if cursor:
@@ -189,20 +207,15 @@ def login_user():
 @app.route('/protected', methods=['GET'])
 @custom_user_required()
 def protected():
-    """
-    A sample protected route to test the custom decorator.
-    """
     user_id = request.headers.get('X-User-ID')
     return jsonify(logged_in_as={'id': user_id, 'message': 'You have accessed a protected route with a custom header'}), 200
 # --- END PROTECTED ROUTE ---
 
 
 # --- Leave Type Management Endpoints (Admin Only) ---
-
 @app.route('/leave_types', methods=['POST'])
 @custom_admin_required()
 def add_leave_type():
-    """Adds a new leave type."""
     data = request.get_json()
     name = data.get('name')
     description = data.get('description')
@@ -226,7 +239,7 @@ def add_leave_type():
         conn.commit()
         return jsonify({"message": "Leave type added successfully!", "id": cursor.lastrowid}), 201
     except mysql.connector.Error as err:
-        if err.errno == 1062: # Duplicate entry error
+        if err.errno == 1062:
             return jsonify({"message": "Leave type name already exists."}), 409
         return jsonify({"message": f"Database error: {err}"}), 500
     except Exception as e:
@@ -240,7 +253,6 @@ def add_leave_type():
 
 @app.route('/leave_types', methods=['GET'])
 def get_all_leave_types():
-    """Retrieves all available leave types."""
     conn = None
     cursor = None
     try:
@@ -252,7 +264,6 @@ def get_all_leave_types():
         query = "SELECT id, name, description, max_days_per_year FROM leave_types ORDER BY name"
         cursor.execute(query)
         leave_types = cursor.fetchall()
-
         return jsonify(leave_types), 200
     except Exception as e:
         return jsonify({"message": f"An unexpected error occurred: {str(e)}"}), 500
@@ -263,13 +274,9 @@ def get_all_leave_types():
             conn.close()
 
 # --- Leave Request and Balance Endpoints (Employee Functionality) ---
-
 @app.route('/leave_requests', methods=['POST'])
 @custom_user_required()
 def apply_for_leave():
-    """
-    Submits a new leave request for the authenticated user.
-    """
     user_id = request.current_user_id
     data = request.get_json()
     leave_type_id = data.get('leave_type_id')
@@ -322,10 +329,6 @@ def apply_for_leave():
 @app.route('/users/<int:user_id>/leave_balances', methods=['GET'])
 @custom_user_required()
 def get_user_leave_balances(user_id):
-    """
-    Retrieves the leave balances for a specific user.
-    Requires the user to be the owner of the ID or an admin.
-    """
     current_user_id = request.current_user_id
     if current_user_id != user_id and request.headers.get('X-User-Role') != 'admin':
         return jsonify({"message": "Unauthorized to view these balances."}), 403
@@ -347,10 +350,8 @@ def get_user_leave_balances(user_id):
         """
         cursor.execute(query, (user_id,))
         balances = cursor.fetchall()
-
         if not balances:
             return jsonify({"message": "No leave balances found for this user."}), 404
-
         return jsonify(balances), 200
     except Exception as e:
         return jsonify({"message": f"An unexpected error occurred: {str(e)}"}), 500
@@ -364,10 +365,6 @@ def get_user_leave_balances(user_id):
 @app.route('/users/<int:user_id>/leave_requests', methods=['GET'])
 @custom_user_required()
 def get_user_leave_requests(user_id):
-    """
-    Retrieves all leave requests for a specific user.
-    Requires the user to be the owner of the ID or an admin.
-    """
     current_user_id = request.current_user_id
     if current_user_id != user_id and request.headers.get('X-User-Role') != 'admin':
         return jsonify({"message": "Unauthorized to view these requests."}), 403
@@ -383,6 +380,7 @@ def get_user_leave_requests(user_id):
         query = """
         SELECT
             lr.id AS request_id,
+            u.username AS employee_username,
             lt.name AS leave_type_name,
             lr.start_date,
             lr.end_date,
@@ -414,13 +412,9 @@ def get_user_leave_requests(user_id):
             conn.close()
 
 # --- Admin Leave Request Management Endpoints ---
-
 @app.route('/admin/leave_requests', methods=['GET'])
 @custom_admin_required()
 def get_all_pending_leave_requests():
-    """
-    Retrieves all pending leave requests for review by an admin.
-    """
     conn = None
     cursor = None
     try:
@@ -448,10 +442,8 @@ def get_all_pending_leave_requests():
         """
         cursor.execute(query)
         pending_requests = cursor.fetchall()
-
         if not pending_requests:
             return jsonify({"message": "No pending leave requests found."}), 404
-
         return jsonify(pending_requests), 200
     except Exception as e:
         return jsonify({"message": f"An unexpected error occurred: {str(e)}"}), 500
@@ -465,13 +457,9 @@ def get_all_pending_leave_requests():
 @app.route('/admin/leave_requests/<int:request_id>/approve', methods=['PUT'])
 @custom_admin_required()
 def approve_leave_request(request_id):
-    """
-    Approves a pending leave request and updates the user's leave balance.
-    """
-    admin_id = request.headers.get('X-User-ID') # Get admin_id from header
+    admin_id = request.headers.get('X-User-ID')
     if not admin_id:
         return jsonify({"message": "Admin ID header is missing."}), 401
-
     conn = None
     cursor = None
     try:
@@ -519,7 +507,6 @@ def approve_leave_request(request_id):
             UPDATE leave_requests SET status = 'approved', approved_by = %s, approval_date = NOW()
             WHERE id = %s
         """, (admin_id, request_id))
-
         conn.commit()
         return jsonify({"message": "Leave request approved and balance updated successfully!"}), 200
 
@@ -539,13 +526,9 @@ def approve_leave_request(request_id):
 @app.route('/admin/leave_requests/<int:request_id>/decline', methods=['PUT'])
 @custom_admin_required()
 def decline_leave_request(request_id):
-    """
-    Declines a pending leave request.
-    """
-    admin_id = request.headers.get('X-User-ID') # Get admin_id from header
+    admin_id = request.headers.get('X-User-ID')
     if not admin_id:
         return jsonify({"message": "Admin ID header is missing."}), 401
-
     conn = None
     cursor = None
     try:
@@ -570,7 +553,6 @@ def decline_leave_request(request_id):
             UPDATE leave_requests SET status = 'declined', approved_by = %s, approval_date = NOW()
             WHERE id = %s
         """, (admin_id, request_id))
-
         conn.commit()
         return jsonify({"message": "Leave request declined successfully!"}), 200
     except mysql.connector.Error as err:
@@ -586,11 +568,9 @@ def decline_leave_request(request_id):
             conn.close()
 
 # --- Admin User Management Endpoints ---
-
 @app.route('/admin/users', methods=['GET'])
 @custom_admin_required()
 def get_all_users():
-    """Retrieves a list of all users."""
     conn = None
     cursor = None
     try:
@@ -602,7 +582,6 @@ def get_all_users():
         query = "SELECT id, username, email, first_name, last_name, role, created_at FROM users ORDER BY username"
         cursor.execute(query)
         users = cursor.fetchall()
-
         return jsonify(users), 200
     except Exception as e:
         return jsonify({"message": f"An unexpected error occurred: {str(e)}"}), 500
@@ -616,7 +595,6 @@ def get_all_users():
 @app.route('/admin/users', methods=['POST'])
 @custom_admin_required()
 def admin_create_user():
-    """Allows an admin to create a new user."""
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
@@ -631,7 +609,6 @@ def admin_create_user():
         return jsonify({"message": "Invalid role. Must be 'employee' or 'admin'."}), 400
 
     hashed_password = generate_password_hash(password)
-
     conn = None
     cursor = None
     try:
@@ -663,7 +640,6 @@ def admin_create_user():
 @app.route('/admin/users/<int:user_id>', methods=['PUT'])
 @custom_admin_required()
 def admin_update_user(user_id):
-    """Allows an admin to update a user's details."""
     data = request.get_json()
     username = data.get('username')
     email = data.get('email')
@@ -671,7 +647,6 @@ def admin_update_user(user_id):
     last_name = data.get('last_name')
     role = data.get('role')
     password = data.get('password')
-
     updates = []
     params = []
 
@@ -710,10 +685,8 @@ def admin_update_user(user_id):
         cursor = conn.cursor()
         query = f"UPDATE users SET {', '.join(updates)} WHERE id = %s"
         params.append(user_id)
-
         cursor.execute(query, tuple(params))
         conn.commit()
-
         if cursor.rowcount == 0:
             return jsonify({"message": "User not found or no changes made."}), 404
         return jsonify({"message": "User updated successfully!"}), 200
@@ -733,7 +706,6 @@ def admin_update_user(user_id):
 @app.route('/admin/users/<int:user_id>', methods=['DELETE'])
 @custom_admin_required()
 def admin_delete_user(user_id):
-    """Allows an admin to delete a user and their associated data."""
     conn = None
     cursor = None
     try:
@@ -768,9 +740,6 @@ def admin_delete_user(user_id):
 @app.route('/admin/users/<int:user_id>/leave_balances', methods=['POST', 'PUT'])
 @custom_admin_required()
 def admin_set_user_leave_balance(user_id):
-    """
-    Sets or updates a specific leave balance for a user.
-    """
     data = request.get_json()
     leave_type_id = data.get('leave_type_id')
     balance = data.get('balance')
@@ -819,7 +788,6 @@ def admin_set_user_leave_balance(user_id):
             """
             cursor.execute(query, (user_id, leave_type_id, balance, year))
             message = "Leave balance initialized successfully!"
-
         conn.commit()
         return jsonify({"message": message}), 200
     except mysql.connector.Error as err:

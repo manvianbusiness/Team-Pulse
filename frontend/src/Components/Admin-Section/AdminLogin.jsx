@@ -8,17 +8,17 @@ import slide3 from "../../assets/login.png"; // reused login image
 import './AdminLogin.css';
 
 const AdminLogin = () => {
-  const [username, setUsername] = useState('');
+   const [identifier, setIdentifier] = useState(''); // username or email
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleAdminLogin = async (e) => {
+   const handleAdminLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:5000/login', {
-        username,
-        password
+      const response = await axios.post('http://127.0.0.1:5000/admin_login', {
+        identifier, 
+        password,
       });
 
       const { user_id, role } = response.data;
@@ -36,7 +36,6 @@ const AdminLogin = () => {
       alert(error.response?.data?.message || 'Login failed');
     }
   };
-
   return (
     <Container fluid className="admin-login-container">
       <Row className="align-items-center justify-content-center vh-100">
@@ -63,8 +62,8 @@ const AdminLogin = () => {
                 <Form.Control
                   type="text"
                   placeholder="Enter username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   required
                 />
               </Form.Group>

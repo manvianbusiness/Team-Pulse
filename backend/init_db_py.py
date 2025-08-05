@@ -16,7 +16,7 @@ import os
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'Rejoy@2005', # !! IMPORTANT: Use your actual MySQL root password here
+    'password': 'mysql123', # !! IMPORTANT: Use your actual MySQL root password here
     # Note: We initially connect without specifying a database to create it first
 }
 
