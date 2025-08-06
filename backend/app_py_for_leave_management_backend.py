@@ -14,7 +14,7 @@ import os
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'mysql123', # !! IMPORTANT: Ensure this is your actual MySQL password
+    'password': 'Akshaya@2004', # !! IMPORTANT: Ensure this is your actual MySQL password
     'database': 'leave_management_db'
 }
 
@@ -264,9 +264,13 @@ def get_all_leave_types():
         query = "SELECT id, name, description, max_days_per_year FROM leave_types ORDER BY name"
         cursor.execute(query)
         leave_types = cursor.fetchall()
-        return jsonify(leave_types), 200
+
+        # ✅ Wrap in object
+        return jsonify({"leave_types": leave_types}), 200
+
     except Exception as e:
         return jsonify({"message": f"An unexpected error occurred: {str(e)}"}), 500
+
     finally:
         if cursor:
             cursor.close()

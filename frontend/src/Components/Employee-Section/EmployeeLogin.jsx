@@ -42,8 +42,9 @@ const EmployeeLogin = () => {
       const { user_id, role } = data;
 
       if (role === "employee") {
-        localStorage.setItem("user_id", user_id);
-        localStorage.setItem("role", role);
+        // ✅ FIXED KEY NAMES FOR CONSISTENCY
+        localStorage.setItem("userId", user_id);
+        localStorage.setItem("userRole", role);
         navigate("/employee-dashboard");
       } else {
         alert("Access denied: Not an employee");
