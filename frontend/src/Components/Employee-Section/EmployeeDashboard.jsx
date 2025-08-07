@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Row,
@@ -14,35 +14,47 @@ import { FaCalendarAlt, FaBell } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import EmployeeSidebar from "./EmployeeSidebar";
 import "./EmployeeDashboard.css";
-import WelcomeIllustration from "../../assets/WelcomeIllustration.png"; // ✅ FIXED: removed space
+import WelcomeIllustration from "../../assets/WelcomeIllustration.png";
+import axios from "axios";
 
 const EmployeeDashboard = () => {
-  const totalLeaves = 20;
-  const leavesTaken = 10;
-  const pendingLeaves = 2;
+  const [leaveHistory, setLeaveHistory] = useState([]);
+  const [totalLeaves, setTotalLeaves] = useState(20);
+  const [leavesTaken, setLeavesTaken] = useState(0);
+  const [pendingLeaves, setPendingLeaves] = useState(0);
+
+  const userId = localStorage.getItem("userId");
+
+  useEffect(() => {
+    const fetchLeaveHistory = async () => {
+      try {
+        const response = await axios.get(`http://127.0.0.1:5000/leave_requests/${userId}`);
+        const data = response.data;
+
+        setLeaveHistory(data);
+
+        const approved = data.filter((leave) => leave.status === "Approved").length;
+        const pending = data.filter((leave) => leave.status === "Pending").length;
+
+        let approvedDays = 0;
+        data.forEach((leave) => {
+          if (leave.status === "Approved") {
+            approvedDays += parseFloat(leave.num_days);
+          }
+        });
+
+        setLeavesTaken(approvedDays);
+        setPendingLeaves(pending);
+      } catch (error) {
+        console.error("Error fetching leave history:", error);
+      }
+    };
+
+    if (userId) fetchLeaveHistory();
+  }, [userId]);
+
   const remainingLeaves = totalLeaves - leavesTaken;
   const leavePercentage = (leavesTaken / totalLeaves) * 100;
-
-  const leaveHistory = [
-    {
-      date: "2024-07-10 to 2024-07-12",
-      type: "Sick Leave",
-      status: "Approved",
-      duration: "3 Days",
-    },
-    {
-      date: "2024-06-05 to 2024-06-06",
-      type: "Casual Leave",
-      status: "Rejected",
-      duration: "2 Days",
-    },
-    {
-      date: "2024-05-15",
-      type: "Half Day",
-      status: "Pending",
-      duration: "0.5 Day",
-    },
-  ];
 
   const holidays = [
     { name: "Independence Day", date: "2024-08-15" },
@@ -59,7 +71,6 @@ const EmployeeDashboard = () => {
 
       <div className="main-content">
         <Container fluid className="p-4">
-          {/* Welcome Section */}
           <Row className="mb-4 align-items-center">
             <Col md={8}>
               <Card className="shadow-sm p-4 d-flex flex-row align-items-center justify-content-between welcome-card">
@@ -81,7 +92,6 @@ const EmployeeDashboard = () => {
             </Col>
           </Row>
 
-          {/* Leave Overview */}
           <Row className="mb-4">
             <Col md={3}>
               <Card className="text-white card-blue text-center p-3">
@@ -109,7 +119,6 @@ const EmployeeDashboard = () => {
             </Col>
           </Row>
 
-          {/* Leave Usage and Notifications */}
           <Row className="mb-4">
             <Col md={8}>
               <Card className="shadow-sm p-3">
@@ -142,7 +151,6 @@ const EmployeeDashboard = () => {
             </Col>
           </Row>
 
-          {/* Leave History and Holidays */}
           <Row className="mb-4">
             <Col md={7}>
               <Card className="shadow-sm p-3">
@@ -150,7 +158,8 @@ const EmployeeDashboard = () => {
                 <Table striped bordered hover>
                   <thead>
                     <tr>
-                      <th>Date</th>
+                      <th>From</th>
+                      <th>To</th>
                       <th>Type</th>
                       <th>Duration</th>
                       <th>Status</th>
@@ -159,9 +168,10 @@ const EmployeeDashboard = () => {
                   <tbody>
                     {leaveHistory.map((leave, i) => (
                       <tr key={i}>
-                        <td>{leave.date}</td>
-                        <td>{leave.type}</td>
-                        <td>{leave.duration}</td>
+                        <td>{leave.start_date}</td>
+                        <td>{leave.end_date}</td>
+                        <td>{leave.leave_type}</td>
+                        <td>{leave.num_days} Days</td>
                         <td>
                           <Badge
                             bg={
@@ -198,7 +208,6 @@ const EmployeeDashboard = () => {
             </Col>
           </Row>
 
-          {/* Manager Feedback and Quick Links */}
           <Row>
             <Col md={6}>
               <Card className="shadow-sm p-3">
