@@ -28,29 +28,39 @@ const EmployeeDashboard = () => {
   useEffect(() => {
     const fetchLeaveHistory = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/leave_requests/${userId}`);
-        const data = response.data;
+        // Fetch applied leaves for this employee from backend
+        const response = await axios.get(
+          `http://127.0.0.1:5000/users/<int:user_id>/leave_requests`,
+          {
+            headers: {
+              "X-User-ID": userId,
+              "X-User-Role": "employee",
+            },
+          }
+        );
 
+        const data = response.data;
         setLeaveHistory(data);
 
-        const approved = data.filter((leave) => leave.status === "Approved").length;
-        const pending = data.filter((leave) => leave.status === "Pending").length;
+        // Calculate leaves taken and pending
+        const approvedDays = data
+          .filter((leave) => leave.status === "Approved")
+          .reduce((sum, leave) => sum + parseFloat(leave.num_days || 0), 0);
 
-        let approvedDays = 0;
-        data.forEach((leave) => {
-          if (leave.status === "Approved") {
-            approvedDays += parseFloat(leave.num_days);
-          }
-        });
+        const pendingCount = data.filter(
+          (leave) => leave.status === "Pending"
+        ).length;
 
         setLeavesTaken(approvedDays);
-        setPendingLeaves(pending);
+        setPendingLeaves(pendingCount);
       } catch (error) {
         console.error("Error fetching leave history:", error);
       }
     };
 
-    if (userId) fetchLeaveHistory();
+    if (userId) {
+      fetchLeaveHistory();
+    }
   }, [userId]);
 
   const remainingLeaves = totalLeaves - leavesTaken;
@@ -71,6 +81,7 @@ const EmployeeDashboard = () => {
 
       <div className="main-content">
         <Container fluid className="p-4">
+          {/* Welcome Section */}
           <Row className="mb-4 align-items-center">
             <Col md={8}>
               <Card className="shadow-sm p-4 d-flex flex-row align-items-center justify-content-between welcome-card">
@@ -92,6 +103,7 @@ const EmployeeDashboard = () => {
             </Col>
           </Row>
 
+          {/* Leave Summary */}
           <Row className="mb-4">
             <Col md={3}>
               <Card className="text-white card-blue text-center p-3">
@@ -119,6 +131,7 @@ const EmployeeDashboard = () => {
             </Col>
           </Row>
 
+          {/* Leave Usage & Notifications */}
           <Row className="mb-4">
             <Col md={8}>
               <Card className="shadow-sm p-3">
@@ -151,6 +164,7 @@ const EmployeeDashboard = () => {
             </Col>
           </Row>
 
+          {/* Leave History & Holidays */}
           <Row className="mb-4">
             <Col md={7}>
               <Card className="shadow-sm p-3">
@@ -166,27 +180,35 @@ const EmployeeDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {leaveHistory.map((leave, i) => (
-                      <tr key={i}>
-                        <td>{leave.start_date}</td>
-                        <td>{leave.end_date}</td>
-                        <td>{leave.leave_type}</td>
-                        <td>{leave.num_days} Days</td>
-                        <td>
-                          <Badge
-                            bg={
-                              leave.status === "Approved"
-                                ? "success"
-                                : leave.status === "Pending"
-                                ? "warning"
-                                : "danger"
-                            }
-                          >
-                            {leave.status}
-                          </Badge>
+                    {leaveHistory.length > 0 ? (
+                      leaveHistory.map((leave, i) => (
+                        <tr key={i}>
+                          <td>{leave.start_date}</td>
+                          <td>{leave.end_date}</td>
+                          <td>{leave.leave_type}</td>
+                          <td>{leave.num_days} Days</td>
+                          <td>
+                            <Badge
+                              bg={
+                                leave.status === "Approved"
+                                  ? "success"
+                                  : leave.status === "Pending"
+                                  ? "warning"
+                                  : "danger"
+                              }
+                            >
+                              {leave.status}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="text-center">
+                          No leave history found.
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </Table>
               </Card>
@@ -208,6 +230,7 @@ const EmployeeDashboard = () => {
             </Col>
           </Row>
 
+          {/* Comments & Quick Links */}
           <Row>
             <Col md={6}>
               <Card className="shadow-sm p-3">
