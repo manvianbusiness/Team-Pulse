@@ -10,6 +10,8 @@ import {
   Col,
   Alert,
   Carousel,
+  ToggleButtonGroup,
+  ToggleButton
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaLock } from "react-icons/fa";
@@ -19,13 +21,18 @@ const EmployeeLogin = () => {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [roleView, setRoleView] = useState("employee"); // toggle state
   const navigate = useNavigate();
 
-  const handleEmployeeLogin = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    const loginUrl =
+      roleView === "employee"
+        ? "http://127.0.0.1:5000/employee_login"
+        : "http://127.0.0.1:5000/admin_login";
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/employee_login", {
+      const response = await fetch(loginUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -41,13 +48,14 @@ const EmployeeLogin = () => {
 
       const { user_id, role } = data;
 
-      if (role === "employee") {
-        // ✅ FIXED KEY NAMES FOR CONSISTENCY
+      if (role.toLowerCase() === roleView) {
         localStorage.setItem("userId", user_id);
         localStorage.setItem("userRole", role);
-        navigate("/employee-dashboard");
+        navigate(
+          roleView === "employee" ? "/employee-dashboard" : "/admin-dashboard"
+        );
       } else {
-        alert("Access denied: Not an employee");
+        alert("Access denied: Wrong role");
       }
     } catch (error) {
       console.error("Login error:", error.message);
@@ -77,11 +85,37 @@ const EmployeeLogin = () => {
 
         <Col md={4}>
           <Card className="login-card p-4 shadow">
-            <h3 className="text-center mb-4">Employee Login</h3>
+            {/* 🔹 Role Toggle */}
+            <ToggleButtonGroup
+              type="radio"
+              name="roleToggle"
+              value={roleView}
+              onChange={(val) => setRoleView(val)}
+              className="mb-4 w-100"
+            >
+              <ToggleButton
+                id="tbg-btn-1"
+                value="employee"
+                variant={roleView === "employee" ? "primary" : "outline-primary"}
+              >
+                Employee
+              </ToggleButton>
+              <ToggleButton
+                id="tbg-btn-2"
+                value="admin"
+                variant={roleView === "admin" ? "primary" : "outline-primary"}
+              >
+                Admin
+              </ToggleButton>
+            </ToggleButtonGroup>
+
+            <h3 className="text-center mb-4">
+              {roleView === "employee" ? "Employee Login" : "Admin Login"}
+            </h3>
 
             {errorMsg && <Alert variant="danger">{errorMsg}</Alert>}
 
-            <Form onSubmit={handleEmployeeLogin}>
+            <Form onSubmit={handleLogin}>
               <Form.Group className="mb-3">
                 <Form.Label>
                   <FaUser className="me-2" />
@@ -115,8 +149,14 @@ const EmployeeLogin = () => {
               </Button>
             </Form>
 
+            {/* 🔹 Register Buttons */}
             <div className="text-center mt-3">
-              <Link to="/">Login as Admin</Link>
+              <Link
+                to={roleView === "employee" ? "/register-employee" : "/register-admin"}
+                className="btn btn-outline-secondary w-100"
+              >
+                Register as {roleView.charAt(0).toUpperCase() + roleView.slice(1)}
+              </Link>
             </div>
           </Card>
         </Col>

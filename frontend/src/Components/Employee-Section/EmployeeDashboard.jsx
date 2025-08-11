@@ -19,17 +19,18 @@ import axios from "axios";
 
 const EmployeeDashboard = () => {
   const [leaveHistory, setLeaveHistory] = useState([]);
-  const [totalLeaves, setTotalLeaves] = useState(20); // Set as per your policy
+  const [totalLeaves, setTotalLeaves] = useState(20);
   const [leavesTaken, setLeavesTaken] = useState(0);
   const [pendingLeaves, setPendingLeaves] = useState(0);
 
   const userId = localStorage.getItem("userId");
 
   useEffect(() => {
+    let interval;
+
     const fetchLeaveHistory = async () => {
       try {
         if (!userId) return;
-
         const response = await axios.get(
           `http://127.0.0.1:5000/users/${userId}/leave_requests`,
           {
@@ -39,18 +40,15 @@ const EmployeeDashboard = () => {
             },
           }
         );
-
         const data = response.data;
         setLeaveHistory(data);
 
-        // Calculate total approved leave days
         const approvedDays = data
-          .filter((leave) => leave.status === "Approved")
+          .filter((leave) => leave.status.toLowerCase() === "approved")
           .reduce((sum, leave) => sum + parseFloat(leave.num_days || 0), 0);
 
-        // Count pending leave requests
         const pendingCount = data.filter(
-          (leave) => leave.status === "Pending"
+          (leave) => leave.status.toLowerCase() === "pending"
         ).length;
 
         setLeavesTaken(approvedDays);
@@ -61,6 +59,9 @@ const EmployeeDashboard = () => {
     };
 
     fetchLeaveHistory();
+    interval = setInterval(fetchLeaveHistory, 5000); // refresh every 5 seconds
+
+    return () => clearInterval(interval);
   }, [userId]);
 
   const remainingLeaves = totalLeaves - leavesTaken;
@@ -75,12 +76,10 @@ const EmployeeDashboard = () => {
 
   return (
     <div className="dashboard-wrapper d-flex">
-      {/* Sidebar */}
       <div className="sidebar">
         <EmployeeSidebar />
       </div>
 
-      {/* Main content */}
       <div className="main-content flex-grow-1">
         <Container fluid className="p-4">
           {/* Welcome Section */}
@@ -192,9 +191,9 @@ const EmployeeDashboard = () => {
                           <td>
                             <Badge
                               bg={
-                                leave.status === "Approved"
+                                leave.status.toLowerCase() === "approved"
                                   ? "success"
-                                  : leave.status === "Pending"
+                                  : leave.status.toLowerCase() === "pending"
                                   ? "warning"
                                   : "danger"
                               }

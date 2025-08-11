@@ -19,6 +19,9 @@ import ApplyLeave from './Components/Employee-Section/ApplyLeave';
 import Attendance from './Components/Employee-Section/Attendance';
 import EmployeeProfile from './Components/Employee-Section/EmployeeProfile';
 import Broadcast from './Components/Employee-Section/EmployeeBroadcast';
+import AdminRegister from './Components/Admin-Section/AdminRegister';
+import EmployeeRegister from './Components/Employee-Section/EmployeeRegister';
+import EmployeeBroadcast from './Components/Employee-Section/EmployeeBroadcast';
 
 const App = () => {
   return (
@@ -33,13 +36,15 @@ const App = () => {
         <Route path="/admin-broadcast" element={<AdminBroadcast />} />
         <Route path="/leave-policies" element={<LeavePolicies />} />
         <Route path="/addleavetype" element={<AddLeave />} />
+        <Route path='/register-admin' element={<AdminRegister />} />
         {/* Employee Routes */}
         <Route path="/employee-login" element={<EmployeeLogin />} />
         <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
         <Route path="/apply-leave" element={<ApplyLeave />} />
         <Route path="/employee-attendance" element={<Attendance />} />
         <Route path="/profile" element={<EmployeeProfile />} />
-        <Route path="/employee-broadcast" element={<Broadcast />} />
+        <Route path="/employee-broadcast" element={<EmployeeBroadcast />} />
+        <Route path='/register-employee' element={<EmployeeRegister />} />
       </Routes>
     </Router>
   );
