@@ -1,41 +1,46 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { Form, Button, Container, Card, Row, Col, Carousel } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { Form, Button, Container, Card, Row, Col, Carousel } from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
 import slide1 from "../../assets/slide2.png";
 import slide2 from "../../assets/slide3.png";
-import slide3 from "../../assets/login.png"; // reused login image
-import './AdminLogin.css';
+import slide3 from "../../assets/login.png";
+import "./AdminLogin.css";
 
 const AdminLogin = () => {
-   const [identifier, setIdentifier] = useState(''); // username or email
-  const [password, setPassword] = useState('');
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-   const handleAdminLogin = async (e) => {
+  const handleAdminLogin = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/admin_login', {
-        identifier, 
-        password,
+      const response = await fetch("http://127.0.0.1:5000/admin_login", {
+        method: "POST",
+        credentials: "include", // ✅ send cookies
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier, password }), // ✅ use state values
       });
 
-      const { user_id, role } = response.data;
+      const data = await response.json();
 
-      if (role === 'admin') {
-        localStorage.setItem('user_id', user_id);
-        localStorage.setItem('role', role);
-        navigate('/admin-dashboard');
+      if (response.ok) {
+        // ✅ Store in localStorage for React checks
+        localStorage.setItem("userId", data.user_id);
+        localStorage.setItem("role", data.role);
+
+        // Redirect to admin dashboard
+        navigate("/admin-dashboard");
       } else {
-        alert('Access denied: Not an admin');
+        setError(data.message || "Login failed");
       }
-
-    } catch (error) {
-      console.error('Login error:', error.response?.data || error.message);
-      alert(error.response?.data?.message || 'Login failed');
+    } catch (err) {
+      setError("Network error. Please check if backend is running.");
     }
   };
+
   return (
     <Container fluid className="admin-login-container">
       <Row className="align-items-center justify-content-center vh-100">
@@ -56,12 +61,13 @@ const AdminLogin = () => {
         <Col md={4}>
           <Card className="login-card p-4 shadow">
             <h3 className="text-center mb-4">Admin Login</h3>
+            {error && <div className="alert alert-danger">{error}</div>}
             <Form onSubmit={handleAdminLogin}>
               <Form.Group className="mb-3">
-                <Form.Label>Username</Form.Label>
+                <Form.Label>Username or Email</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Enter username"
+                  placeholder="Enter username or email"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   required

@@ -37,14 +37,14 @@ const LeaveRequestForm = () => {
         "http://127.0.0.1:5000/leave_requests",
         {
           ...formData,
-          user_id: localStorage.getItem("userId")
+          user_id: localStorage.getItem("userId"),
         },
         {
           headers: {
             "Content-Type": "application/json",
             "X-User-Role": localStorage.getItem("role"),
-            "X-User-ID": localStorage.getItem("userId")
-          }
+            "X-User-ID": localStorage.getItem("userId"),
+          },
         }
       );
 
@@ -55,8 +55,11 @@ const LeaveRequestForm = () => {
         start_date: "",
         end_date: "",
         reason: "",
-        num_days: ""
+        num_days: "",
       });
+
+      // Dispatch custom event to notify dashboard for update
+      window.dispatchEvent(new Event("leaveRequestUpdated"));
     } catch (err) {
       setVariant("danger");
       setResponseMessage(err?.response?.data?.message || "An error occurred.");

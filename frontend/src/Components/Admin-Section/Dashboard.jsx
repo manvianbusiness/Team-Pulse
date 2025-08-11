@@ -1,18 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Table, ListGroup, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import AdminSidebar from '../Admin-Section/AdminSidebar';
 import './Dashboard.css';
 
-const initialLeaveRequests = [
-  { employee: 'Joe', type: 'Vacation', dates: '2024-05-10 to 2024-05-12', status: 'Pending' },
-  { employee: 'Jack', type: 'Sick', dates: '2024-05-05 to 2024-05-09', status: 'Approved' },
-  { employee: 'Michael', type: 'Vacation', dates: '2024-05-15 to 2024-05-18', status: 'Rejected' },
-  { employee: 'Emily', type: 'Sick', dates: '2024-05-07', status: 'Pending' }
-];
-
 const Dashboard = () => {
-  const [leaveRequests, setLeaveRequests] = useState(initialLeaveRequests);
+  const [leaveRequests, setLeaveRequests] = useState([]);
+  const userId = localStorage.getItem('userId');
+
+  const fetchLeaveRequests = async () => {
+    if (!userId) {
+      console.warn("User ID not found in localStorage");
+      return;
+    }
+    try {
+      const url = `http://127.0.0.1:5000/admin/leave_requests`;
+
+      const res = await axios.get(url, {
+        headers: {
+          "X-User-Role": localStorage.getItem("role"),
+          "X-User-ID": userId
+        }
+      });
+
+      console.log('Raw leave requests data:', res.data);
+      setLeaveRequests(res.data || []);
+    } catch (err) {
+      console.error('Error fetching leave requests:', err);
+      setLeaveRequests([]); // clear on error
+    }
+  };
+
+  useEffect(() => {
+    fetchLeaveRequests();
+  }, []);
+
+  useEffect(() => {
+    const handleLeaveRequestUpdated = () => {
+      fetchLeaveRequests();
+    };
+
+    window.addEventListener('leaveRequestUpdated', handleLeaveRequestUpdated);
+
+    return () => {
+      window.removeEventListener('leaveRequestUpdated', handleLeaveRequestUpdated);
+    };
+  }, []);
+
+  useEffect(() => {
+    const intervalId = setInterval(fetchLeaveRequests, 10000); // polling every 10 seconds
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -23,12 +62,16 @@ const Dashboard = () => {
     const updatedRequests = [...leaveRequests];
     updatedRequests[index].status = 'Approved';
     setLeaveRequests(updatedRequests);
+
+    // TODO: Call backend API to approve request, then fetchLeaveRequests()
   };
 
   const handleReject = (index) => {
     const updatedRequests = [...leaveRequests];
     updatedRequests[index].status = 'Rejected';
     setLeaveRequests(updatedRequests);
+
+    // TODO: Call backend API to reject request, then fetchLeaveRequests()
   };
 
   return (
@@ -54,7 +97,7 @@ const Dashboard = () => {
             <Card className="dashboard-card text-white shadow-sm">
               <Card.Body>
                 <Card.Title>Pending Requests</Card.Title>
-                <h4>{leaveRequests.filter(req => req.status === 'Pending').length}</h4>
+                <h4>{leaveRequests.filter(req => req.status.toLowerCase() === 'pending').length}</h4>
               </Card.Body>
             </Card>
           </Col>
@@ -62,7 +105,7 @@ const Dashboard = () => {
             <Card className="dashboard-card text-white shadow-sm">
               <Card.Body>
                 <Card.Title>Approved Leaves</Card.Title>
-                <h4>{leaveRequests.filter(req => req.status === 'Approved').length}</h4>
+                <h4>{leaveRequests.filter(req => req.status.toLowerCase() === 'approved').length}</h4>
               </Card.Body>
             </Card>
           </Col>
@@ -70,7 +113,7 @@ const Dashboard = () => {
             <Card className="dashboard-card text-white shadow-sm">
               <Card.Body>
                 <Card.Title>Rejected Leaves</Card.Title>
-                <h4>{leaveRequests.filter(req => req.status === 'Rejected').length}</h4>
+                <h4>{leaveRequests.filter(req => req.status.toLowerCase() === 'rejected').length}</h4>
               </Card.Body>
             </Card>
           </Col>
@@ -94,42 +137,51 @@ const Dashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="text-center align-middle">
-                    {leaveRequests.map((req, i) => (
-                      <tr key={i}>
-                        <td>{i + 1}</td>
-                        <td>{req.employee}</td>
-                        <td>{req.type}</td>
-                        <td>{req.dates}</td>
-                        <td>
-                          <span className={`badge px-3 py-2 fs-6 
-                            ${req.status === 'Approved' ? 'bg-success' :
-                              req.status === 'Rejected' ? 'bg-danger' :
-                              'pending-status'}`}>
-                            {req.status}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="d-flex justify-content-center gap-2">
-                            <Button
-                              size="sm"
-                              className="btn-plain-success"
-                              onClick={() => handleApprove(i)}
-                              disabled={req.status === 'Approved'}
-                            >
-                              Approve
-                            </Button>
-                            <Button
-                              size="sm"
-                              className="btn-plain-danger"
-                              onClick={() => handleReject(i)}
-                              disabled={req.status === 'Rejected'}
-                            >
-                              Reject
-                            </Button>
-                          </div>
-                        </td>
+                    {leaveRequests.length === 0 ? (
+                      <tr>
+                        <td colSpan="6">No leave requests found.</td>
                       </tr>
-                    ))}
+                    ) : (
+                      leaveRequests.map((req, i) => (
+                        <tr key={i}>
+                          <td>{i + 1}</td>
+                          <td>{req.employee_username}</td>
+                          <td>{req.leave_type_name}</td>
+                          <td>
+                            {req.start_date}
+                            {req.end_date && req.end_date !== req.start_date ? ` to ${req.end_date}` : ''}
+                          </td>
+                          <td>
+                            <span className={`badge px-3 py-2 fs-6 
+                              ${req.status.toLowerCase() === 'approved' ? 'bg-success' :
+                                req.status.toLowerCase() === 'rejected' ? 'bg-danger' :
+                                'pending-status'}`}>
+                              {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="d-flex justify-content-center gap-2">
+                              <Button
+                                size="sm"
+                                className="btn-plain-success"
+                                onClick={() => handleApprove(i)}
+                                disabled={req.status.toLowerCase() === 'approved'}
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="btn-plain-danger"
+                                onClick={() => handleReject(i)}
+                                disabled={req.status.toLowerCase() === 'rejected'}
+                              >
+                                Reject
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </Table>
               </Card.Body>
@@ -149,8 +201,6 @@ const Dashboard = () => {
               </Card.Body>
             </Card>
           </Col>
-
-          
         </Row>
       </Container>
     </div>

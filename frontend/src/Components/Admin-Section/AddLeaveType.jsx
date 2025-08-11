@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button, Card, Container, Form, Alert } from "react-bootstrap";
+import axios from "axios";
 import AdminSidebar from "./AdminSidebar";
 
 const AddLeaveType = () => {
@@ -10,14 +11,15 @@ const AddLeaveType = () => {
   });
 
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  const [currentUser, setCurrentUser] = useState(null);
+  const [variant, setVariant] = useState("success");
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
     const role = localStorage.getItem("role");
-    if (userId && role === "admin") {
-      setCurrentUser({ user_id: userId, role });
+
+    if (!userId || role !== "admin") {
+      setMessage("Please log in as an admin before adding a leave type.");
+      setVariant("danger");
     }
   }, []);
 
@@ -32,36 +34,26 @@ const AddLeaveType = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!currentUser || currentUser.role !== "admin") {
-      setError("Admin access required. Please log in first.");
-      setMessage("");
-      return;
-    }
-
     try {
-      const response = await fetch("http://127.0.0.1:5000/leave_types", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-User-Role": currentUser.role,
-          "X-User-ID": currentUser.user_id,
-        },
-        body: JSON.stringify(formData),
-      });
+      const res = await axios.post(
+        "http://127.0.0.1:5000/leave_types",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-User-Role": localStorage.getItem("role"),
+            "X-User-ID": localStorage.getItem("userId"),
+          },
+          withCredentials: true, // ✅ send cookies if needed
+        }
+      );
 
-      const result = await response.json();
-
-      if (response.ok) {
-        setMessage(`Leave type added successfully! ID: ${result.id}`);
-        setError("");
-        setFormData({ name: "", description: "", max_days_per_year: 12 });
-      } else {
-        setError(result.message);
-        setMessage("");
-      }
+      setVariant("success");
+      setMessage(`Leave type added successfully! ID: ${res.data.id}`);
+      setFormData({ name: "", description: "", max_days_per_year: 12 });
     } catch (err) {
-      setError("Network error. Is the backend running?");
-      setMessage("");
+      setVariant("danger");
+      setMessage(err?.response?.data?.message || "Failed to add leave type.");
     }
   };
 
@@ -72,8 +64,7 @@ const AddLeaveType = () => {
         <Card>
           <Card.Body>
             <Card.Title>Add Leave Type</Card.Title>
-            {message && <Alert variant="success">{message}</Alert>}
-            {error && <Alert variant="danger">{error}</Alert>}
+            {message && <Alert variant={variant}>{message}</Alert>}
 
             <Form onSubmit={handleSubmit}>
               <Form.Group>
@@ -109,7 +100,7 @@ const AddLeaveType = () => {
                 />
               </Form.Group>
 
-              <Button className="mt-4" type="submit">
+              <Button className="mt-4" type="submit" disabled={variant === "danger"}>
                 Add Leave Type
               </Button>
             </Form>

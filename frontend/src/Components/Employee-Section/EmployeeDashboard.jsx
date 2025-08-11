@@ -19,7 +19,7 @@ import axios from "axios";
 
 const EmployeeDashboard = () => {
   const [leaveHistory, setLeaveHistory] = useState([]);
-  const [totalLeaves, setTotalLeaves] = useState(20);
+  const [totalLeaves, setTotalLeaves] = useState(20); // Set as per your policy
   const [leavesTaken, setLeavesTaken] = useState(0);
   const [pendingLeaves, setPendingLeaves] = useState(0);
 
@@ -28,9 +28,10 @@ const EmployeeDashboard = () => {
   useEffect(() => {
     const fetchLeaveHistory = async () => {
       try {
-        // Fetch applied leaves for this employee from backend
+        if (!userId) return;
+
         const response = await axios.get(
-          `http://127.0.0.1:5000/users/<int:user_id>/leave_requests`,
+          `http://127.0.0.1:5000/users/${userId}/leave_requests`,
           {
             headers: {
               "X-User-ID": userId,
@@ -42,11 +43,12 @@ const EmployeeDashboard = () => {
         const data = response.data;
         setLeaveHistory(data);
 
-        // Calculate leaves taken and pending
+        // Calculate total approved leave days
         const approvedDays = data
           .filter((leave) => leave.status === "Approved")
           .reduce((sum, leave) => sum + parseFloat(leave.num_days || 0), 0);
 
+        // Count pending leave requests
         const pendingCount = data.filter(
           (leave) => leave.status === "Pending"
         ).length;
@@ -58,13 +60,11 @@ const EmployeeDashboard = () => {
       }
     };
 
-    if (userId) {
-      fetchLeaveHistory();
-    }
+    fetchLeaveHistory();
   }, [userId]);
 
   const remainingLeaves = totalLeaves - leavesTaken;
-  const leavePercentage = (leavesTaken / totalLeaves) * 100;
+  const leavePercentage = totalLeaves > 0 ? (leavesTaken / totalLeaves) * 100 : 0;
 
   const holidays = [
     { name: "Independence Day", date: "2024-08-15" },
@@ -74,12 +74,14 @@ const EmployeeDashboard = () => {
   ];
 
   return (
-    <div className="dashboard-wrapper">
+    <div className="dashboard-wrapper d-flex">
+      {/* Sidebar */}
       <div className="sidebar">
         <EmployeeSidebar />
       </div>
 
-      <div className="main-content">
+      {/* Main content */}
+      <div className="main-content flex-grow-1">
         <Container fluid className="p-4">
           {/* Welcome Section */}
           <Row className="mb-4 align-items-center">
@@ -169,7 +171,7 @@ const EmployeeDashboard = () => {
             <Col md={7}>
               <Card className="shadow-sm p-3">
                 <h5>Leave History</h5>
-                <Table striped bordered hover>
+                <Table striped bordered hover responsive>
                   <thead>
                     <tr>
                       <th>From</th>
