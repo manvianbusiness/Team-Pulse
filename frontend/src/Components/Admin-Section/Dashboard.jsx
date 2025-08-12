@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Table, Spinner, Alert, Button } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import axios from "axios";
-
+import AdminSidebar from './AdminSidebar.jsx'
 const Dashboard = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,47 +42,59 @@ const Dashboard = () => {
   };
 
   return (
+    <div>
+    <AdminSidebar />   
     <Container className="py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <h3>Welcome, {username}</h3>
-        <Button variant="outline-danger" onClick={handleLogout}>Logout</Button>
+
+        <div className="d-flex gap-2 flex-wrap">
+          <Link to="/leave-policies">
+            <Button variant="info" className="text-white">
+              View Leave Policies
+            </Button>
+          </Link>
+          <Button variant="outline-danger" onClick={handleLogout}>
+            Logout
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
       <Row className="mb-4">
-        <Col md={4}>
-          <Card className="text-center p-3">
-            <h6>Pending Requests</h6>
-            <h4>{pending}</h4>
+        <Col md={4} sm={12}>
+          <Card className="text-center p-3 shadow-sm border-primary">
+            <h6 className="text-primary fw-bold">Pending Requests</h6>
+            <h2 className="text-primary">{pending}</h2>
           </Card>
         </Col>
-        <Col md={4}>
-          <Card className="text-center p-3">
-            <h6>Approved Leaves</h6>
-            <h4>{approved}</h4>
+        <Col md={4} sm={12}>
+          <Card className="text-center p-3 shadow-sm border-success">
+            <h6 className="text-success fw-bold">Approved Leaves</h6>
+            <h2 className="text-success">{approved}</h2>
           </Card>
         </Col>
-        <Col md={4}>
-          <Card className="text-center p-3">
-            <h6>Rejected Leaves</h6>
-            <h4>{rejected}</h4>
+        <Col md={4} sm={12}>
+          <Card className="text-center p-3 shadow-sm border-danger">
+            <h6 className="text-danger fw-bold">Rejected Leaves</h6>
+            <h2 className="text-danger">{rejected}</h2>
           </Card>
         </Col>
       </Row>
 
       {/* Leave Requests Table */}
-      <Card>
+      <Card className="shadow-sm">
         <Card.Body>
-          <h5>Your Leave Requests</h5>
+          <h5 className="mb-3">Your Leave Requests</h5>
           {loading ? (
-            <div className="text-center">
-              <Spinner animation="border" />
+            <div className="text-center py-5">
+              <Spinner animation="border" variant="primary" />
             </div>
           ) : error ? (
             <Alert variant="danger">{error}</Alert>
           ) : (
-            <Table bordered responsive>
-              <thead>
+            <Table bordered responsive hover>
+              <thead className="table-primary">
                 <tr>
                   <th>#</th>
                   <th>Leave Type</th>
@@ -93,7 +106,9 @@ const Dashboard = () => {
               <tbody>
                 {requests.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="text-center">No leave requests found</td>
+                    <td colSpan="5" className="text-center py-3">
+                      No leave requests found
+                    </td>
                   </tr>
                 ) : (
                   requests.map((req, index) => (
@@ -102,7 +117,19 @@ const Dashboard = () => {
                       <td>{req.leave_type_name}</td>
                       <td>{req.start_date}</td>
                       <td>{req.end_date || req.start_date}</td>
-                      <td>{req.status}</td>
+                      <td>
+                        <span
+                          className={
+                            req.status.toLowerCase() === "approved"
+                              ? "text-success fw-bold"
+                              : req.status.toLowerCase() === "pending"
+                              ? "text-warning fw-bold"
+                              : "text-danger fw-bold"
+                          }
+                        >
+                          {req.status}
+                        </span>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -112,6 +139,7 @@ const Dashboard = () => {
         </Card.Body>
       </Card>
     </Container>
+     </div>
   );
 };
 

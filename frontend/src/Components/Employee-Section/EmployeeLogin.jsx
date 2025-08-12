@@ -10,8 +10,6 @@ import {
   Col,
   Alert,
   Carousel,
-  ToggleButtonGroup,
-  ToggleButton
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaLock } from "react-icons/fa";
@@ -21,22 +19,16 @@ const EmployeeLogin = () => {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-  const [roleView, setRoleView] = useState("employee"); // toggle state
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const loginUrl =
-      roleView === "employee"
-        ? "http://127.0.0.1:5000/employee_login"
-        : "http://127.0.0.1:5000/admin_login";
+    const loginUrl = "http://127.0.0.1:5000/employee_login";
 
     try {
       const response = await fetch(loginUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier, password }),
       });
 
@@ -46,16 +38,16 @@ const EmployeeLogin = () => {
         throw new Error(data.message || "Login failed");
       }
 
-      const { user_id, role } = data;
+      const { user_id, role, username } = data; // Expect username here
 
-      if (role.toLowerCase() === roleView) {
+      // Only allow login if role is employee
+      if (role.toLowerCase() === "employee") {
         localStorage.setItem("userId", user_id);
         localStorage.setItem("userRole", role);
-        navigate(
-          roleView === "employee" ? "/employee-dashboard" : "/admin-dashboard"
-        );
+        localStorage.setItem("username", username); // Save username to localStorage
+        navigate("/employee-dashboard");
       } else {
-        alert("Access denied: Wrong role");
+        alert("Access denied: Not an employee");
       }
     } catch (error) {
       console.error("Login error:", error.message);
@@ -67,51 +59,48 @@ const EmployeeLogin = () => {
     <Container fluid className="employee-login-container">
       <Row className="align-items-center justify-content-center vh-100">
         <Col md={6} className="text-center">
-          <Carousel fade interval={3000} controls={false} indicators={false} pause={false} wrap={true}>
+          <Carousel
+            fade
+            interval={3000}
+            controls={false}
+            indicators={false}
+            pause={false}
+            wrap={true}
+          >
             <Carousel.Item>
-              <img className="d-block w-100 login-image" src={slide1} alt="Slide 1" />
+              <img
+                className="d-block w-100 login-image"
+                src={slide1}
+                alt="Slide 1"
+              />
             </Carousel.Item>
             <Carousel.Item>
-              <img className="d-block w-100 login-image" src={slide2} alt="Slide 2" />
+              <img
+                className="d-block w-100 login-image"
+                src={slide2}
+                alt="Slide 2"
+              />
             </Carousel.Item>
             <Carousel.Item>
-              <img className="d-block w-100 login-image" src={slide1} alt="Slide 3" />
+              <img
+                className="d-block w-100 login-image"
+                src={slide1}
+                alt="Slide 3"
+              />
             </Carousel.Item>
             <Carousel.Item>
-              <img className="d-block w-100 login-image" src={slide2} alt="Slide 4" />
+              <img
+                className="d-block w-100 login-image"
+                src={slide2}
+                alt="Slide 4"
+              />
             </Carousel.Item>
           </Carousel>
         </Col>
 
         <Col md={4}>
           <Card className="login-card p-4 shadow">
-            {/* 🔹 Role Toggle */}
-            <ToggleButtonGroup
-              type="radio"
-              name="roleToggle"
-              value={roleView}
-              onChange={(val) => setRoleView(val)}
-              className="mb-4 w-100"
-            >
-              <ToggleButton
-                id="tbg-btn-1"
-                value="employee"
-                variant={roleView === "employee" ? "primary" : "outline-primary"}
-              >
-                Employee
-              </ToggleButton>
-              <ToggleButton
-                id="tbg-btn-2"
-                value="admin"
-                variant={roleView === "admin" ? "primary" : "outline-primary"}
-              >
-                Admin
-              </ToggleButton>
-            </ToggleButtonGroup>
-
-            <h3 className="text-center mb-4">
-              {roleView === "employee" ? "Employee Login" : "Admin Login"}
-            </h3>
+            <h3 className="text-center mb-4">Employee Login</h3>
 
             {errorMsg && <Alert variant="danger">{errorMsg}</Alert>}
 
@@ -149,13 +138,12 @@ const EmployeeLogin = () => {
               </Button>
             </Form>
 
-            {/* 🔹 Register Buttons */}
             <div className="text-center mt-3">
               <Link
-                to={roleView === "employee" ? "/register-employee" : "/register-admin"}
+                to="/register-employee"
                 className="btn btn-outline-secondary w-100"
               >
-                Register as {roleView.charAt(0).toUpperCase() + roleView.slice(1)}
+                Register as Employee
               </Link>
             </div>
           </Card>

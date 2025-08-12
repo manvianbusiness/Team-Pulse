@@ -19,19 +19,16 @@ const AdminLogin = () => {
     try {
       const response = await fetch("http://127.0.0.1:5000/admin_login", {
         method: "POST",
-        credentials: "include", // ✅ send cookies
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier, password }), // ✅ use state values
+        body: JSON.stringify({ identifier, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // ✅ Store in localStorage for React checks
         localStorage.setItem("userId", data.user_id);
         localStorage.setItem("role", data.role);
-
-        // Redirect to admin dashboard
         navigate("/admin-dashboard");
       } else {
         setError(data.message || "Login failed");
@@ -85,10 +82,18 @@ const AdminLogin = () => {
                 />
               </Form.Group>
 
-              <Button variant="primary" type="submit" className="w-100">
+              <Button variant="primary" type="submit" className="w-100 mb-3">
                 Login
               </Button>
+
+              <Link
+                to="/register-admin"
+                className="btn btn-outline-secondary w-100"
+              >
+                Register as Admin
+              </Link>
             </Form>
+
             <div className="text-center mt-3">
               <Link to="/employee-login">Login as Employee</Link>
             </div>
