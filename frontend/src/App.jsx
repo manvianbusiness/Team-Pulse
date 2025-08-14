@@ -18,10 +18,11 @@ import EmployeeDashboard from './Components/Employee-Section/EmployeeDashboard';
 import ApplyLeave from './Components/Employee-Section/ApplyLeave';
 import Attendance from './Components/Employee-Section/Attendance';
 import EmployeeProfile from './Components/Employee-Section/EmployeeProfile';
-import Broadcast from './Components/Employee-Section/EmployeeBroadcast';
 import AdminRegister from './Components/Admin-Section/AdminRegister';
 import EmployeeRegister from './Components/Employee-Section/EmployeeRegister';
 import EmployeeBroadcast from './Components/Employee-Section/EmployeeBroadcast';
+import PerformancePage from './Components/Admin-Section/Performance';
+import EmployeePerformance from './Components/Admin-Section/EmployeePerformance';
 
 const App = () => {
   return (
@@ -37,6 +38,8 @@ const App = () => {
         <Route path="/leave-policies" element={<LeavePolicies />} />
         <Route path="/addleavetype" element={<AddLeave />} />
         <Route path='/register-admin' element={<AdminRegister />} />
+        <Route path='/performance' element={<PerformancePage />} />
+        <Route path='/employeeperformance' element={<EmployeePerformance />} />
         {/* Employee Routes */}
         <Route path="/employee-login" element={<EmployeeLogin />} />
         <Route path="/employee-dashboard" element={<EmployeeDashboard />} />

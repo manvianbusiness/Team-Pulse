@@ -7,7 +7,8 @@ import {
   FaCalendarAlt,
   FaUser,
   FaBullhorn,
-  FaCalendarPlus 
+  FaCalendarPlus ,
+  FaChartBar
 } from "react-icons/fa";
 import "animate.css"; // Import animate.css
 import "./AdminSidebar.css";
@@ -46,6 +47,10 @@ const AdminSidebar = () => {
 
         <Nav.Link as={Link} to="/addleavetype" className="sidebar-link">
           <FaCalendarPlus  className="me-2"  data-icon-hover/> Add Leave
+        </Nav.Link>
+
+        <Nav.Link as={Link} to="/performance" className="sidebar-link">
+          <FaChartBar  className="me-2"  icon-hover/> Performance
         </Nav.Link>
       </Nav>
     </div>
