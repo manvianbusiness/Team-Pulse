@@ -16,6 +16,9 @@ const AdminLogin = () => {
     e.preventDefault();
     setError("");
 
+    // Clear any old stored data before new login
+    localStorage.clear();
+
     try {
       const response = await fetch("http://127.0.0.1:5000/admin_login", {
         method: "POST",
