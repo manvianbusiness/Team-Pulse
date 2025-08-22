@@ -1,0 +1,45 @@
+
+
+.employee-performance {
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.performance-container {
+  background: #fff;
+   margin-left: 250px;
+}
+
+.bg-gradient {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+.nav-custom .nav-link {
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 6px;
+  transition: all 0.3s ease-in-out;
+}
+
+.nav-custom .nav-link.active {
+  background-color: #0d6efd !important;
+  color: #fff !important;
+}
+
+.custom-table {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
+}
+
+.custom-table th {
+  background: #212529 !important;
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.custom-table td {
+  vertical-align: middle;
+}

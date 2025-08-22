@@ -1,220 +1,224 @@
-// MonthlyPerformanceReport.jsx
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import {
   Container,
+  Card,
+  Table,
+  Alert,
   Row,
   Col,
-  Card,
-  Form,
-  Table,
-  Button,
   ProgressBar,
+  ListGroup,
+  Badge,
 } from "react-bootstrap";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  BarChart,
-  Bar,
-} from "recharts";
-import { FaSave, FaFileCsv, FaFileExcel } from "react-icons/fa";
-import * as XLSX from "xlsx";
+  FaUsers,
+  FaTasks,
+  FaProjectDiagram,
+  FaStar,
+  FaChartLine,
+  FaTrophy,
+} from "react-icons/fa";
 import AdminSidebar from "./AdminSidebar";
-import "./Performance.css";
 
-// Sample employee monthly data
-const sampleEmployees = [
-  { id: 1, name: "Alice", department: "HR", shift: "Day", performance: 85 },
-  { id: 2, name: "Bob", department: "IT", shift: "Night", performance: 70 },
-  { id: 3, name: "Charlie", department: "Finance", shift: "Day", performance: 90 },
-  { id: 4, name: "David", department: "IT", shift: "Day", performance: 60 },
-];
+// You will need to install react-icons
+// `npm install react-icons --save`
 
 const MonthlyPerformanceReport = () => {
-  const [employees, setEmployees] = useState(sampleEmployees);
-  const [month, setMonth] = useState("01");
-  const [year, setYear] = useState("2025");
-  const [department, setDepartment] = useState("All");
-  const [shift, setShift] = useState("All");
+  const [reportData] = useState([
+    {
+      id: 1,
+      name: "John Doe",
+      tasksCompleted: 25,
+      projectsCompleted: 3,
+      feedbackScore: 4.5,
+    },
+    {
+      id: 2,
+      name: "Jane Smith",
+      tasksCompleted: 30,
+      projectsCompleted: 4,
+      feedbackScore: 4.8,
+    },
+    {
+      id: 3,
+      name: "Peter Jones",
+      tasksCompleted: 18,
+      projectsCompleted: 2,
+      feedbackScore: 3.9,
+    },
+    {
+      id: 4,
+      name: "Mary Brown",
+      tasksCompleted: 22,
+      projectsCompleted: 3,
+      feedbackScore: 4.2,
+    },
+    {
+      id: 5,
+      name: "Chris Evans",
+      tasksCompleted: 35,
+      projectsCompleted: 5,
+      feedbackScore: 4.9,
+    },
+  ]);
 
-  const filteredEmployees = useMemo(() => {
-    return employees.filter((emp) => {
-      return (
-        (department === "All" || emp.department === department) &&
-        (shift === "All" || emp.shift === shift)
-      );
-    });
-  }, [department, shift, employees]);
+  // Calculate dashboard metrics
+  const totalEmployees = reportData.length;
+  const totalTasks = reportData.reduce((acc, e) => acc + e.tasksCompleted, 0);
+  const totalProjects = reportData.reduce((acc, e) => acc + e.projectsCompleted, 0);
+  const avgFeedbackScore = (reportData.reduce((acc, e) => acc + e.feedbackScore, 0) / totalEmployees).toFixed(1);
 
-  const getProgressVariant = (value) => {
-    if (value >= 85) return "success";
-    if (value >= 60) return "info";
-    if (value >= 40) return "warning";
-    return "danger";
-  };
+  // Sort data to find top performers
+  const sortedByTasks = [...reportData].sort((a, b) => b.tasksCompleted - a.tasksCompleted);
+  const topTaskPerformer = sortedByTasks[0];
 
-  const handleExportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(filteredEmployees);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "MonthlyReport");
-    XLSX.writeFile(workbook, `MonthlyPerformance_${month}-${year}.xlsx`);
-  };
-
-  const handleExportCSV = () => {
-    const worksheet = XLSX.utils.json_to_sheet(filteredEmployees);
-    const csv = XLSX.utils.sheet_to_csv(worksheet);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.setAttribute("download", `MonthlyPerformance_${month}-${year}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const averagePerformance =
-    filteredEmployees.reduce((sum, emp) => sum + emp.performance, 0) /
-    filteredEmployees.length || 0;
+  const sortedByFeedback = [...reportData].sort((a, b) => b.feedbackScore - a.feedbackScore);
+  const topFeedbackPerformer = sortedByFeedback[0];
 
   return (
-    <div className="performance-container">
+    <div>
       <AdminSidebar />
-      <Container fluid className="p-4">
-        <h2 className="mb-4">Monthly Performance Report</h2>
+    <Container className="my-5 p-4 bg-light rounded shadow-lg">
+     
+      
 
-        <Card className="mb-4 shadow-sm p-3 rounded">
-          <Row className="align-items-center">
-            <Col md={2} className="mb-2">
-              <Form.Select value={month} onChange={(e) => setMonth(e.target.value)}>
-                <option value="01">Jan</option>
-                <option value="02">Feb</option>
-                <option value="03">Mar</option>
-                <option value="04">Apr</option>
-                <option value="05">May</option>
-                <option value="06">Jun</option>
-                <option value="07">Jul</option>
-                <option value="08">Aug</option>
-                <option value="09">Sep</option>
-                <option value="10">Oct</option>
-                <option value="11">Nov</option>
-                <option value="12">Dec</option>
-              </Form.Select>
-            </Col>
-            <Col md={2} className="mb-2">
-              <Form.Control
-                type="number"
-                min="2020"
-                max="2030"
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-              />
-            </Col>
-            <Col md={2} className="mb-2">
-              <Form.Select
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-              >
-                <option value="All">All Departments</option>
-                <option value="HR">HR</option>
-                <option value="IT">IT</option>
-                <option value="Finance">Finance</option>
-              </Form.Select>
-            </Col>
-            <Col md={2} className="mb-2">
-              <Form.Select value={shift} onChange={(e) => setShift(e.target.value)}>
-                <option value="All">All Shifts</option>
-                <option value="Day">Day</option>
-                <option value="Night">Night</option>
-              </Form.Select>
-            </Col>
-            <Col md={2} className="mb-2">
-              <Button variant="success" className="w-100" onClick={handleExportExcel}>
-                <FaFileExcel /> Excel
-              </Button>
-            </Col>
-            <Col md={2} className="mb-2">
-              <Button variant="info" className="w-100" onClick={handleExportCSV}>
-                <FaFileCsv /> CSV
-              </Button>
-            </Col>
-          </Row>
-        </Card>
+      {/* --- KPI Cards Section --- */}
+      <Row className="g-4 mb-5">
+        <Col md={6} lg={3}>
+          <Card className="h-100 border-primary shadow-sm">
+            <Card.Body className="text-center">
+              <FaUsers size={40} className="text-primary mb-3" />
+              <h6>Total Employees</h6>
+              <h2 className="display-4 fw-bold">{totalEmployees}</h2>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={6} lg={3}>
+          <Card className="h-100 border-success shadow-sm">
+            <Card.Body className="text-center">
+              <FaTasks size={40} className="text-success mb-3" />
+              <h6>Tasks Completed</h6>
+              <h2 className="display-4 fw-bold">{totalTasks}</h2>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={6} lg={3}>
+          <Card className="h-100 border-info shadow-sm">
+            <Card.Body className="text-center">
+              <FaProjectDiagram size={40} className="text-info mb-3" />
+              <h6>Projects Completed</h6>
+              <h2 className="display-4 fw-bold">{totalProjects}</h2>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={6} lg={3}>
+          <Card className="h-100 border-warning shadow-sm">
+            <Card.Body className="text-center">
+              <FaStar size={40} className="text-warning mb-3" />
+              <h6>Avg Feedback Score</h6>
+              <h2 className="display-4 fw-bold">{avgFeedbackScore}</h2>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
 
-        <Row>
-          <Col md={8}>
-            <Card className="p-3 mb-4 shadow-sm rounded">
-              <h5 className="mb-3">Employee Performance Table</h5>
-              <Table striped bordered hover responsive className="align-middle">
-                <thead className="table-dark">
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Department</th>
-                    <th>Shift</th>
-                    <th>Performance (%)</th>
+      {/* --- Top Performers and Overall Progress --- */}
+      <Row className="g-4 mb-5">
+        <Col lg={6}>
+          <Card className="h-100 shadow-sm">
+            <Card.Header as="h5" className="bg-light">
+              <FaTrophy className="me-2 text-warning" />
+              Top Performers
+            </Card.Header>
+            <Card.Body>
+              <ListGroup variant="flush">
+                <ListGroup.Item className="d-flex justify-content-between align-items-center">
+                  Top Task Performer
+                  <div>
+                    <Badge bg="success" className="me-2">
+                      {topTaskPerformer.tasksCompleted} Tasks
+                    </Badge>
+                    <span className="fw-bold">{topTaskPerformer.name}</span>
+                  </div>
+                </ListGroup.Item>
+                <ListGroup.Item className="d-flex justify-content-between align-items-center">
+                  Highest Feedback Score
+                  <div>
+                    <Badge bg="info" className="me-2">
+                      {topFeedbackPerformer.feedbackScore} ⭐
+                    </Badge>
+                    <span className="fw-bold">{topFeedbackPerformer.name}</span>
+                  </div>
+                </ListGroup.Item>
+              </ListGroup>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col lg={6}>
+          <Card className="h-100 shadow-sm">
+            <Card.Header as="h5" className="bg-light">
+              <FaChartLine className="me-2 text-secondary" />
+              Overall Progress
+            </Card.Header>
+            <Card.Body>
+              <h6 className="mt-3">Team Productivity</h6>
+              <ProgressBar now={80} label={`${80}%`} variant="success" className="mb-3" />
+              <h6 className="mt-3">Project Delivery Rate</h6>
+              <ProgressBar now={90} label={`${90}%`} variant="primary" className="mb-3" />
+              <h6 className="mt-3">Average Feedback Rating</h6>
+              <ProgressBar now={avgFeedbackScore * 20} label={`${avgFeedbackScore}⭐`} variant="warning" />
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* --- Full Performance Report Table --- */}
+      <Card className="shadow-sm">
+        <Card.Header as="h5" className="bg-light">
+          Employee Performance Breakdown
+        </Card.Header>
+        <Card.Body>
+          {reportData.length > 0 ? (
+            <Table striped bordered hover responsive>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Employee Name</th>
+                  <th>Tasks Completed</th>
+                  <th>Projects Completed</th>
+                  <th>Feedback Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reportData.map((employee) => (
+                  <tr key={employee.id}>
+                    <td>{employee.id}</td>
+                    <td>{employee.name}</td>
+                    <td>
+                      <Badge bg="primary">{employee.tasksCompleted}</Badge>
+                    </td>
+                    <td>
+                      <Badge bg="info">{employee.projectsCompleted}</Badge>
+                    </td>
+                    <td>
+                      <Badge bg="warning" text="dark">
+                        {employee.feedbackScore} ⭐
+                      </Badge>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredEmployees.map((emp) => (
-                    <tr key={emp.id}>
-                      <td>{emp.id}</td>
-                      <td>{emp.name}</td>
-                      <td>{emp.department}</td>
-                      <td>{emp.shift}</td>
-                      <td>
-                        <ProgressBar
-                          now={emp.performance}
-                          label={`${emp.performance}%`}
-                          variant={getProgressVariant(emp.performance)}
-                          animated
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-              <p>
-                <strong>Average Performance: </strong>
-                {averagePerformance.toFixed(2)}%
-              </p>
-            </Card>
-          </Col>
-
-          <Col md={4}>
-            <Card className="p-3 mb-4 shadow-sm rounded">
-              <h5 className="mb-3">Performance Overview</h5>
-              <BarChart width={300} height={250} data={filteredEmployees}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="performance" fill="#0d6efd" />
-              </BarChart>
-            </Card>
-
-            <Card className="p-3 shadow-sm rounded">
-              <h5 className="mb-3">Performance Trend</h5>
-              <LineChart width={300} height={250} data={filteredEmployees}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="performance" stroke="#28a745" />
-              </LineChart>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </div>
+                ))}
+              </tbody>
+            </Table>
+          ) : (
+            <Alert variant="info" className="text-center">
+              No performance data available for this month.
+            </Alert>
+          )}
+        </Card.Body>
+      </Card>
+    </Container>
+     </div>
   );
 };
 
 export default MonthlyPerformanceReport;
-
-

@@ -12,7 +12,7 @@ import os
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'Rejoy@2005',  # !! IMPORTANT: Ensure this is your actual MySQL password
+    'password': 'Akshaya@2004',  # !! IMPORTANT: Ensure this is your actual MySQL password
     'database': 'employee_db'     # !! IMPORTANT: Note the new database name
 }
 

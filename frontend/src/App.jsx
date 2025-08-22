@@ -23,7 +23,11 @@ import EmployeeRegister from './Components/Employee-Section/EmployeeRegister';
 import EmployeeBroadcast from './Components/Employee-Section/EmployeeBroadcast';
 import PerformancePage from './Components/Admin-Section/Performance';
 import EmployeePerformance from './Components/Admin-Section/EmployeePerformance';
-
+import EmployeePerformanceTracker from './Components/Employee-Section/EmployeePerformanceTracker';
+import Tasks from './Components/Employee-Section/Tasks'
+import Payroll from "./Components/Admin-Section/PayrollDashboard";
+import EmployeePayroll from './Components/Employee-Section/EmployeePayroll';
+import AdminLetterGeneration from './Components/Admin-Section/AdminLetterGeneration';
 const App = () => {
   return (
     <Router>
@@ -40,6 +44,8 @@ const App = () => {
         <Route path='/register-admin' element={<AdminRegister />} />
         <Route path='/performance' element={<PerformancePage />} />
         <Route path='/employeeperformance' element={<EmployeePerformance />} />
+        <Route path='/payroll' element={<Payroll />} />
+        <Route path='/adminlettergeneration' element={<AdminLetterGeneration />} />
         {/* Employee Routes */}
         <Route path="/employee-login" element={<EmployeeLogin />} />
         <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
@@ -48,6 +54,9 @@ const App = () => {
         <Route path="/profile" element={<EmployeeProfile />} />
         <Route path="/employee-broadcast" element={<EmployeeBroadcast />} />
         <Route path='/register-employee' element={<EmployeeRegister />} />
+        <Route path='/performance-tracker' element={<EmployeePerformanceTracker />} />
+        <Route path="/tasks" element={<Tasks />} />
+        <Route path="/employee-payroll" element={<EmployeePayroll />} />
       </Routes>
     </Router>
   );
